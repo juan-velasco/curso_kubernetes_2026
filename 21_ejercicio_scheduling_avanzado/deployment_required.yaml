@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-anti-affinity-required
+  labels:
+    app: nginx-anti-affinity-required
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-anti-affinity-required
+      workload: HighResourceUsage
+  template:
+    metadata:
+      labels:
+        app: nginx-anti-affinity-required
+        workload: HighResourceUsage
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: workload
+                    operator: In
+                    values:
+                      - HighResourceUsage
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
