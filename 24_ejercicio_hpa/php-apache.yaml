@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-apache
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: php-apache
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-apache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php-apache
+  template:
+    metadata:
+      labels:
+        app: php-apache
+    spec:
+      containers:
+      - name: php-apache
+        # Imagen oficial del tutorial de HPA de Kubernetes.
+        # Ejecuta un bucle de cálculo en cada petición HTTP, consumiendo CPU.
+        image: registry.k8s.io/hpa-example
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 100m
+          limits:
+            cpu: 400m
