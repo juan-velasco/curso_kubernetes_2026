@@ -1,0 +1,46 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hello-kubernetes-httproute-hw1
+spec:
+  parentRefs:
+  - name: eg # Hacemos referencia un gateway llamado "eg", que ya deberíamos tener creado
+  hostnames:
+  - "hw1.cursok8s.localhost"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+      headers:
+      - type: Exact
+        name: x-version
+        value: second
+    backendRefs:
+    - name: hello-kubernetes-second
+      port: 8080
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: hello-kubernetes-first
+      port: 8080
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hello-kubernetes-httproute-hw2
+spec:
+  parentRefs:
+  - name: eg
+  hostnames:
+  - "hw2.cursok8s.localhost"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: hello-kubernetes-second
+      port: 8080
