@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: producer
+  template:
+    metadata:
+      labels:
+        app: producer
+    spec:
+      containers:
+      - name: producer
+        image: jvelascoiti/keda-producer:latest
+        imagePullPolicy: Always
+        env:
+        - name: MYSQL_HOST
+          value: mysql
+        - name: MYSQL_PASSWORD
+          value: cursok8s
+        - name: MYSQL_DATABASE
+          value: cursodb

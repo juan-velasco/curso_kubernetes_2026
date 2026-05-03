@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-connection-secret
+stringData:
+  # Formato requerido por el scaler MySQL de KEDA
+  connectionString: "root:cursok8s@tcp(mysql.default.svc.cluster.local:3306)/cursodb"
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: mysql-trigger-auth
+spec:
+  secretTargetRef:
+  - parameter: connectionString
+    name: mysql-connection-secret
+    key: connectionString
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: consumer-scaledobject
+spec:
+  scaleTargetRef:
+    name: consumer
+  minReplicaCount: 0   # escala a cero cuando la tabla está vacía
+  maxReplicaCount: 10
+  cooldownPeriod: 30   # segundos antes de escalar a la baja
+  triggers:
+  - type: mysql
+    metadata:
+      # KEDA escala 1 réplica por cada 3 filas pendientes en la tabla
+      queryValue: "3"
+      query: "SELECT COUNT(*) FROM cursodb.jobs"
+    authenticationRef:
+      name: mysql-trigger-auth
