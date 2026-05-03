@@ -1,0 +1,22 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: php-apache-vpa
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: php-apache
+  updatePolicy:
+    # "InPlaceOrRecreate": El VPA intentará actualizar los pods en su lugar, pero si no es posible (por ejemplo, si el contenedor no admite actualizaciones en vivo), recreará los pods.
+    # Cambiar a "Off" para ver solo recomendaciones sin tocar los pods.
+    updateMode: "InPlaceOrRecreate"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: php-apache
+      minAllowed:
+        cpu: 50m
+        memory: 32Mi
+      maxAllowed:
+        cpu: 1
+        memory: 512Mi
